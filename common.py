@@ -4,7 +4,6 @@ import os
 import json
 
 initparams = '''{
-    "jobname_prefix_flag" : false,
     "output_prefix" : "",
     "output_delimiter" : " ",
     "prefix_delimiter" : "",
