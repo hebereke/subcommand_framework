@@ -55,9 +55,6 @@ def set_params(initparams_json, subcommand_modules):
     for m in subcommand_modules:
         exec('subparsers = {}.argument(subparsers, parent)'.format(m))
     params = parser.parse_args(namespace=params)
-    # check parameter
-    if params.jobname_prefix_flag:
-        params.quiet_flag = True
     return params
 
 def initparams(scriptparams, core_modules):
