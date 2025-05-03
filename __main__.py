@@ -38,7 +38,7 @@ def set_params(initparams_json, subcommand_modules):
     params.tmpfile = os.path.join(os.getcwd(), '.{}_{}'.format(params.prog, os.getpid()))
     # load subcommand modules
     for m in subcommand_modules:
-        exec('from subcommands import {}'.format(m))
+        exec('from subcommand import {}'.format(m))
         exec('params.loadjson({}.initparams)'.format(m))
     # load default
     if os.getenv('HOME') is not None:
