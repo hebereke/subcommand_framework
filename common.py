@@ -38,7 +38,7 @@ class Singleton(object):
             if sys.version_info.major == 2:
                 cls._instance = super(Singleton, cls).__new__(cls)
             elif sys.version_info.major == 3:
-                cls._instance = super(cls).__new__(cls)
+                cls._instance = super().__new__(cls)
         return cls._instance
 
 ## parameter related
