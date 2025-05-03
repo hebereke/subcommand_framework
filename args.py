@@ -1,5 +1,6 @@
+import common
+params, printlog = common.initialize_modules(__name__)
 import argparse
-import sys
 
 initparams = '''
 {
@@ -66,6 +67,7 @@ def common_arguments(params):
     parser = argparse.ArgumentParser(description='Sample',
         prog = params.prog,
         formatter_class=SubcommandHelpFormatter)
+    parser.set_defaults(handler=parser.print_help)
     parser.add_argument('-v', '--version', action='version',
         version='%(prog)s {}'.format(params.version))
     parser.add_argument('--loglevel', default=params.loglevel,
