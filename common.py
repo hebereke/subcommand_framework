@@ -283,3 +283,13 @@ def tarball_restore(target):
     os.remove(timestamp)
     os.chdir(cwd)
     return os.path.join(srcpdir, srcbname)
+
+def csv2list(csv, element_type='strings'):
+    if element_type == 'int':
+        return [int(e) for e in csv.split(',')]
+    elif element_type == 'float':
+        return [float(e) for e in csv.split(',')]
+    elif element_type == 'strings':
+        return [str(e).strip() for e in csv.split(',')]
+    else:
+        return [e for e in csv.split(',')]

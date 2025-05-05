@@ -81,7 +81,7 @@ def common_arguments(params):
         description='"%(prog)s <subcommand> --help" to see usage of subcommand',
         metavar='')
     common_args = subparsers.add_parser('print_params', add_help=False)
-    common_args.set_defaults(handler=print_params)
+    common_args.set_defaults(handler=lambda params: params.dumpjson())
     parser_common = common_args.add_argument_group('common options')
     parser_common.add_argument('--verbose', dest='verbose_level',
         default=params.verbose_level, type=int,
@@ -89,16 +89,3 @@ def common_arguments(params):
     parser_common.add_argument('targets', nargs='+', # nargs='*',
         help='target files', metavar='FILE')
     return parser, subparsers, common_args
-
-def print_params():
-    return printlog(params.dumpjson())
-
-def csv2list(csv, element_type='strings'):
-    if element_type == 'int':
-        return [int(e) for e in csv.split(',')]
-    elif element_type == 'float':
-        return [float(e) for e in csv.split(',')]
-    elif element_type == 'strings':
-        return [str(e).strip() for e in csv.split(',')]
-    else:
-        return [e for e in csv.split(',')]
