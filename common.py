@@ -178,13 +178,6 @@ def set_logger(name):
     logger.setLevel(logging.DEBUG)
     logger.propagate = True
 
-def set_logfilename():
-    return os.path.join(os.getcwd(),
-            '{}-{}-{}.log'.format(
-                os.path.basename(sys.argv[0]),
-                formattednow(),
-                os.getpid() ) )
-
 # chmod and recursive chmod
 def chmod(path, mode):
     perm_bits = {'ur' : stat.S_IRUSR,'uw' : stat.S_IWUSR,'ux' : stat.S_IXUSR,

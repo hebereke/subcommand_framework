@@ -24,14 +24,21 @@ subcommand_modules = (
     'sample',
 )
 
-def set_params(initparams_json, subcommand_modules):
+def set_params(initparams, subcommand_modules):
     ''' set parameters to be used '''
     params = common.Params()
     # load init params
-    params.loadjson(initparams_json)
+    params.loadjson(initparams)
     # define extra params
     params.dotfile = '.{}'.format(params.prog)
-    params.tmpfile = os.path.join(os.getcwd(), '.{}_{}'.format(params.prog, os.getpid()))
+    params.tmpfile = os.path.join(os.getcwd(),
+        '.{}_{}'.format(
+            params.prog, os.getpid()) )
+    params.logfile = os.path.join(os.getcwd(),
+        '{}-{}-{}.log'.format(
+            params.prog,
+            common.formattednow(),
+            os.getpid()) )
     params.loop_preproc = None
     params.loop_postproc = None
     # load subcommand modules
@@ -55,19 +62,16 @@ def set_params(initparams_json, subcommand_modules):
     params = parser.parse_args(namespace=params)
     return params
 
-def initparams(scriptparams, core_modules):
+def main(scriptparams, core_modules, subcommand_modules=None):
     d = json.loads(scriptparams)
     for m in core_modules:
         exec('import {}'.format(m))
         exec('d.update(json.loads({}.initparams))'.format(m))
-    return json.dumps(d)
-
-def main(scriptparams, core_modules, subcommand_modules=None):
-    initparams_json = initparams(scriptparams, core_modules)
+    initparams = json.dumps(d)
     # parameters
-    if initparams_json is None or subcommand_modules is None:
+    if initparams is None or subcommand_modules is None:
         raise Exception('no initparams and subcommand modules are defined')
-    params = set_params(initparams_json, subcommand_modules)
+    params = set_params(initparams, subcommand_modules)
     # printlog
     printlog = common.Printlog(params)
     # logger
