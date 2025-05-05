@@ -62,8 +62,8 @@ class SubcommandHelpFormatter(CustomHelpFormatter):
 
 def error_nosubcommand(parser):
     err = 'no subcommand is specified'
-    print(err)
     parser.print_usage()
+    print(err)
 
 def common_arguments(params):
     '''parse arguments'''
