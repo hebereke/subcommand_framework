@@ -4,24 +4,26 @@ import os
 import json
 
 initparams = '''{
-    "output_prefix" : "",
-    "output_delimiter" : " ",
-    "prefix_delimiter" : "",
-    "output_indent" : 4
+    "output_prefix" : null,
+    "output_prefix_sep" : " ",
+    "output_indent" : 4,
+    "output_end" : "\\n"
 }'''
 
 # loop
-def loop(files):
-    if os.path.isfile(f):
-        params.cmd(f)
+def loop(params):
+    if params.loop_preproc is not None:
+        params.loop_preproc()
+    for f in params.targets:
+        if os.path.isfile(f):
+            params.cmd(f)
+    if params.loop_postproc is not None:
+        params.loop_postproc()
 
 # initialize
-def init_subcommand_module(name):
-    return initialize_modules(name)
-
 def initialize_modules(name):
     params = Params()
-    printlog = SingletonPrintlog()
+    printlog = Printlog(params)
     set_logger(name)
     return params, printlog
 
@@ -72,47 +74,39 @@ class Params(Singleton, argparse.Namespace):
                 params_dict[k] = str(v)
         return json.dumps(params_dict, indent=4, sort_keys=True)
 
-# logger related
-import logging
-import logging.config
+# extend print function
 class Printlog:
-    ''' logger '''
-    def __init__(self, logfile=None):
-        self.prefix = ''
-        self.prefix_delimiter = ' '
+    ''' extend print function to output stdout and/or file with prefix'''
+    def __init__(self, params):
+        self.prefix = params.output_prefix
+        self.prefix_sep = params.output_prefix_sep
+        self.indent =params.output_indent
+        self.output_file = None
         self.prefix_flag = False
-        self.logfile = logfile
         self.output_stdout_flag = False
-        self.output_file_flag = True
+        self.output_file_flag = False
+        self.end = params.output_end
     def __repr__(self):
-        return 'Printlog(logfile={},({},{}))'.format(self.logfile,
+        return 'Printlog(outfile={},({},{}))'.format(self.output_file,
             self.output_stdout_flag, self.output_file_flag)
     def set_prefix(self):
         return self.prefix
-    def log(self, message, end='\n'):
+    def log(self, message, end=None):
         output = message
+        if end is None:
+            end = self.end
         if self.prefix_flag and self.prefix is not None:
-            output = self.prefix + self.prefix_delimiter + output
+            output = self.prefix + self.prefix_sep + output
         if self.output_file_flag:
-            if self.logfile is None:
+            if self.output_file is None:
                 raise IOError('no logfile specified')
-            with open(self.logfile, 'a') as OUT:
+            with open(self.output_file, 'a') as OUT:
                 OUT.write(output)
         if self.output_stdout_flag:
             print(output, end=end)
         return True
-    def __call__(self, message, end='\n'):
+    def __call__(self, message, end=None):
         self.log(message, end=end)
-
-class SingletonPrintlog(Printlog, Singleton):
-    ''' Singleton logger '''
-    def __init__(self, logfile=None, initprefix='', prefix_delimiter=None, output_delimiter=' '):
-        super(SingletonPrintlog, self).__init__(logfile=logfile)
-        self.output_stdout_flag = True
-        self.output_file_flag = False
-    def __repr__(self):
-        return 'SingletonPrintlog(logfile={},({},{}))'.format(
-            self.logfile, self.output_stdout_flag, self.output_file_flag)
 
 logging_config = '''
 {
@@ -162,7 +156,8 @@ logging_config = '''
     }
 }
 '''
-
+import logging
+import logging.config
 def root_logger(logfile=None, level=logging.DEBUG):
     config_dict = json.loads(logging_config)
     if logfile is not None:

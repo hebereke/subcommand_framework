@@ -1,5 +1,3 @@
-import common
-params, printlog = common.initialize_modules(__name__)
 import argparse
 
 initparams = '''
@@ -29,14 +27,14 @@ class CustomHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescription
                 defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
                 if action.option_strings or action.nargs in defaulting_nargs:
                     if action.default is not None:
-                        if type(action.default) == str or type(action.default) == unicode:
+                        if type(action.default) == str:
                             help += ' (default: "%(default)s")'
                         elif type(action.default) == int or type(action.default) == float:
                             help += ' (default: %(default)s)'
                         elif type(action.default) == list:
                             defaults = []
                             for d in action.default:
-                                if type(d) == str or type(d) == unicode:
+                                if type(d) == str:
                                     defaults.append('"{}"'.format(d))
                                 elif type(d) == int or type(d) == float:
                                     default.append(d)
@@ -62,12 +60,17 @@ class SubcommandHelpFormatter(CustomHelpFormatter):
             parts = "\n".join(parts.split("\n")[1:])
         return parts
 
+def error_nosubcommand(parser):
+    err = 'no subcommand is specified'
+    print(err)
+    parser.print_usage()
+
 def common_arguments(params):
     '''parse arguments'''
     parser = argparse.ArgumentParser(description='Sample',
         prog = params.prog,
         formatter_class=SubcommandHelpFormatter)
-    parser.set_defaults(handler=parser.print_help)
+    parser.set_defaults(handler=lambda params: error_nosubcommand(parser))
     parser.add_argument('-v', '--version', action='version',
         version='%(prog)s {}'.format(params.version))
     parser.add_argument('--loglevel', default=params.loglevel,
@@ -80,7 +83,7 @@ def common_arguments(params):
     common_args = subparsers.add_parser('print_params', add_help=False)
     common_args.set_defaults(handler=print_params)
     parser_common = common_args.add_argument_group('common options')
-    parser_common.add_argument('--verbose', '-v', dest='verbose_level',
+    parser_common.add_argument('--verbose', dest='verbose_level',
         default=params.verbose_level, type=int,
         help='Verbose level', metavar='NUM')
     parser_common.add_argument('targets', nargs='+', # nargs='*',

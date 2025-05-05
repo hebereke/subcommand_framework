@@ -2,13 +2,9 @@
 from __future__ import print_function
 
 ### Modules
-import sys
 import os
 import json
 import common, args
-
-### declare singleton instances
-params, printlog = common.initialize_modules('main')
 
 ### parameters for script by json
 scriptparams = '''
@@ -36,6 +32,8 @@ def set_params(initparams_json, subcommand_modules):
     # define extra params
     params.dotfile = '.{}'.format(params.prog)
     params.tmpfile = os.path.join(os.getcwd(), '.{}_{}'.format(params.prog, os.getpid()))
+    params.loop_preproc = None
+    params.loop_postproc = None
     # load subcommand modules
     for m in subcommand_modules:
         exec('from subcommand import {}'.format(m))
@@ -70,11 +68,15 @@ def main(scriptparams, core_modules, subcommand_modules=None):
     if initparams_json is None or subcommand_modules is None:
         raise Exception('no initparams and subcommand modules are defined')
     params = set_params(initparams_json, subcommand_modules)
+    # printlog
+    printlog = common.Printlog(params)
     # logger
-    printlog = common.SingletonPrintlog(logfile=params.logfile)
     logger = common.root_logger(params.logfile)
     # call subcommand
-    params.handler()
+    if hasattr(params, 'handler'):
+        params.handler(params)
+    else:
+        raise Exception('no handler is defined')
 
 if __name__ == '__main__':
     #subcommand_modules = ('sample',) # subcommands for debugging
