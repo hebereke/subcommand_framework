@@ -1,84 +1,42 @@
-#!/usr/bin/env python
-import os
-import json
-import common, args
+## check if yaml library is available
+import importlib.util
+if not importlib.util.find_spec('yaml'):
+    Exception('taml module is required')
 
-### parameters for script by json
-scriptparams = '''
-{
-    "version" : 0.0,
-    "prog" : "sample"
-}'''
+## load standard libraries
+from dataclasses import dataclass, field
+from pathlib import Path
 
-### core modules
-core_modules = (
-    'args',
-    'common'
-)
+## load subcommands_framework libraries
+from config import GlobalConfig
+from configfile import load_package_config, initialize_params
 
-### subcommand modules by tuple
-subcommand_modules = (
-    'sample',
-)
-
-def set_params(initparams, subcommand_modules):
-    ''' set parameters to be used '''
-    params = common.Params()
-    # load init params
-    params.loadjson(initparams)
-    # define extra params
-    params.dotfile = '.{}'.format(params.prog)
-    params.tmpfile = os.path.join(os.getcwd(),
-        '.{}_{}'.format(
-            params.prog, os.getpid()) )
-    params.logfile = os.path.join(os.getcwd(),
-        '{}-{}-{}.log'.format(
-            params.prog,
-            common.formattednow(),
-            os.getpid()) )
-    params.loop_preproc = None
-    params.loop_postproc = None
-    # load subcommand modules
-    for m in subcommand_modules:
-        exec('from subcommand import {}'.format(m))
-        exec('params.loadjson({}.initparams)'.format(m))
-    # load default
-    if os.getenv('HOME') is not None:
-        dotfile = os.path.join(os.getenv('HOME'), params.dotfile)
-    else:
-        dotfile = os.path.join(os.getcwd(), params.dotfile)
-    if not os.path.isfile(dotfile):
-        dotfile = None
-    if dotfile is not None:
-        with open(dotfile) as DOTFILE:
-            params.loadjson(DOTFILE.read())
-    # parse arguments of each subcommands
-    parser, subparsers, parent = args.common_arguments(params)
-    for m in subcommand_modules:
-        exec('subparsers = {}.argument(subparsers, parent)'.format(m))
-    params = parser.parse_args(namespace=params)
-    return params
-
-def main(scriptparams, core_modules, subcommand_modules=None):
-    d = json.loads(scriptparams)
-    for m in core_modules:
-        exec('import {}'.format(m))
-        exec('d.update(json.loads({}.initparams))'.format(m))
-    initparams = json.dumps(d)
-    # parameters
-    if initparams is None or subcommand_modules is None:
-        raise Exception('no initparams and subcommand modules are defined')
-    params = set_params(initparams, subcommand_modules)
-    # printlog
-    printlog = common.Printlog(params)
-    # logger
-    logger = common.root_logger(params.logfile)
-    # call subcommand
-    if hasattr(params, 'handler'):
-        params.handler(params)
-    else:
-        raise Exception('no handler is defined')
-
+## run main routine
 if __name__ == '__main__':
-    #subcommand_modules = ('sample',) # subcommands for debugging
-    main(scriptparams, core_modules, subcommand_modules)
+    ## determine package location and load package config file
+    package_dir = Path(__file__).resolve().parent
+    package_config = load_package_config(package_dir)
+
+    ## define script config
+    @dataclass(kw_only=True)
+    class ConfigPackage:
+        prog: str = str(package_dir.name)           # program name
+        description: str = ''                       # program description
+        version: float = 0.0                        # version
+        package_dir: Path = package_dir             # package installation directory
+        subcommands_dir: Path = Path('subcommands') # subcommands directory relatively to package_dir
+        data_dir: Path = Path('data')               # data directory relatively to package_dir
+        debug: bool = False                         # debug mode flag
+        params: dict = field(default_factory=dict)  # package config and user defined config
+
+    ## initialize GlobalConfig with ConfigPackage and update package field of package_config
+    package_params = None
+    if 'package' in package_config:
+        package_params = package_config['package']
+        params = initialize_params(ConfigPackage, package_params)
+        GlobalConfig.set_config(ConfigPackage(**params))
+        GlobalConfig.set('params', package_config)
+
+    ## call main function
+    from main import main
+    main()

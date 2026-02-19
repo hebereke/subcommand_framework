@@ -1,0 +1,14 @@
+package:
+  prog: sample
+  version: 1.0.0
+  description: sample script
+  subcommand_mosules:
+    - subcommand_template
+
+common:
+  verbose: false
+  debug: false
+
+commands:
+  template:
+    count: 10
