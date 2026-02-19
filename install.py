@@ -7,8 +7,8 @@ from pathlib import Path
 
 ## check if yaml library is available
 import importlib.util
-if not importlib.util.find_spec('yaml'):
-    Exception('yaml module is required')
+if importlib.util.find_spec('yaml') is None:
+    raise ImportError('yaml module is required')
 from configfile import load_package_config
 
 def create_script(scriptpath, installdir, python_command):
@@ -134,7 +134,7 @@ if __name__ == '__main__':
             script_name = package_config['package']['prog']
         if 'pythoncmd' in package_config['package']:
             python_command = package_config['package']['pythoncmd']
-    install_dir = Path(f'{os.getenv('HOME')}/local/{script_name}') # destination of installation
+    install_dir = Path(os.path.join(os.getenv('HOME', ''), 'local', script_name)) # destination of installation
 
     ## parse arguments
     parser_install = install_argument(

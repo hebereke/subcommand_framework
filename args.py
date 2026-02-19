@@ -1,8 +1,9 @@
 import argparse
+from typing import Tuple
 
 class ListArgumentAction(argparse.Action):
     '''new action to take CSV as list'''
-    def __call__(self, namespace, values):
+    def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values.split(','))
 
 class CustomHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHelpFormatter):
@@ -10,7 +11,7 @@ class CustomHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescription
     def __init__(self, prog, indent_increment=2, max_help_position=32, width=None):
         super(CustomHelpFormatter, self).__init__(prog, indent_increment, max_help_position, width)
     def _get_help_string(self, action):
-        help_text = action.help
+        help_text = action.help or ''
 
         ## mark required
         if getattr(action, 'required', False):
@@ -26,8 +27,9 @@ class CustomHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescription
 
         ## append default info for optional/zero-or-more
         defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
-        if action.option_strings or action.nargs in defaulting_nargs:
-            default_val = action.default
+        nargs = getattr(action, 'nargs', None)
+        if action.option_strings or nargs in defaulting_nargs:
+            default_val = getattr(action, 'default', None)
 
             ## no default
             if default_val is None:
@@ -61,7 +63,6 @@ class CustomHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescription
 
 class RootHelpFormatter(CustomHelpFormatter):
     '''formatter for root parser'''
-    argparse to 
     def _format_action(self, action):
         '''hide the top metavar line subcommands block referring to
 https://stackoverflow.com/questions/13423540/argparse-subparser-hide-metavar-in-command-listing'''
@@ -82,7 +83,7 @@ https://stackoverflow.com/questions/13423540/argparse-subparser-hide-metavar-in-
                 usage = '%(prog)s ' + actions_usage
         return super().add_usage(usage, actions, groups, prefix)
 
-def config_arguments(default_configfiles: list) -> tuple[argparse.ArgumentParser, str]:
+def config_arguments(default_configfiles: list) -> argparse.ArgumentParser:
     '''parse argument for config file'''
     parser_config = argparse.ArgumentParser(add_help=False)
     config_files = ' or '.join(map(str, default_configfiles))
@@ -109,7 +110,7 @@ def error_nosubcommand(parser: argparse.ArgumentParser):
     print(f'usage: {parser.prog} <subcommand> [options] ...')
     print(f'try "{parser.prog} --help"')
 
-def build_root_parser(prog: str, description: str, parent_parsers: list) -> tuple[argparse.ArgumentParser, argparse.ArgumentParser]:
+def build_root_parser(prog: str, description: str, parent_parsers: list) -> Tuple[argparse.ArgumentParser, argparse._SubParsersAction]:
     '''build root parser with specified parent parsers'''
     parser = argparse.ArgumentParser(
         prog=prog,

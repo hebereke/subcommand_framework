@@ -1,6 +1,8 @@
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, fields, asdict
 from pathlib import Path, PosixPath
 import yaml
+from typing import Type
+from config import ConfigT
 
 PACKAGE_CONFIG_FILE = 'package_configs.yaml'
 
@@ -17,25 +19,28 @@ def load_package_config(package_dir: Path) -> dict:
         package_config.update(data)
     return package_config
 
-def initialize_params(config:dataclass, params: dict | None) -> dict:
+def initialize_params(config: Type[ConfigT], params: dict | None) -> dict:
     '''initialize parameter by defined type in config'''
     config_params = asdict(config())
     if params:
-        for field in fields(config):
-            if field.name in params:
-                ftype = type(config_params[field.name])
-                value = params[field.name]
-                if ftype == int:
-                    value = int(value)
-                elif ftype == float:
-                    value = float(value)
-                elif ftype == str:
-                    value = str(value)
-                elif ftype == list:
-                    value = list(value)
-                elif ftype == bool:
-                    value = bool(value)
-                elif ftype == PosixPath:
-                    value = Path(value)
-                config_params[field.name] = value
+        for f in fields(config):
+            if f.name in params:
+                ftype = type(config_params[f.name])
+                value = params[f.name]
+                try:
+                    if ftype == int:
+                        value = int(value)
+                    elif ftype == float:
+                        value = float(value)
+                    elif ftype == str:
+                        value = str(value)
+                    elif ftype == list:
+                        value = list(value)
+                    elif ftype == bool:
+                        value = bool(value)
+                    elif ftype == PosixPath:
+                        value = Path(value)
+                except Exception:
+                    pass
+                config_params[f.name] = value
     return config_params

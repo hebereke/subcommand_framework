@@ -1,29 +1,37 @@
 ## formatted now command
 import datetime
+import os
+import stat
+import tarfile
+import shutil
+
 def formattednow():
     return datetime.datetime.now().strftime('%y%m%d%H%M')
 
 #@ chmod and recursive chmod
-import os
 def chmod(path, mode):
     perm_bits = {'ur' : stat.S_IRUSR,'uw' : stat.S_IWUSR,'ux' : stat.S_IXUSR,
                 'gr' : stat.S_IRGRP,'gw' : stat.S_IWGRP,'gx' : stat.S_IXGRP,
                 'or' : stat.S_IROTH,'ow' : stat.S_IWOTH,'ox' : stat.S_IXOTH}
     cmode = os.stat(path).st_mode
-    for op in ['=','+','-']:
-        if op in mode:
+    op = None
+    for o in ['=','+','-']:
+        if o in mode:
+            op = o
             break
+    if op is None:
+        raise ValueError('invalid mode format')
     modes = mode.split(op)
     for t in modes[0]:
         if op == '=':
-            cmode -= perm_bits[t+'r']
-            cmode -= perm_bits[t+'w']
-            cmode -= perm_bits[t+'x']
+            cmode &= ~perm_bits.get(t+'r', 0)
+            cmode &= ~perm_bits.get(t+'w', 0)
+            cmode &= ~perm_bits.get(t+'x', 0)
         for m in modes[1]:
             if op == '+' or op == '=':
-                cmode |= perm_bits[t+m]
+                cmode |= perm_bits.get(t+m, 0)
             elif op == '-':
-                cmode -= perm_bits[t+m]
+                cmode &= ~perm_bits.get(t+m, 0)
     os.chmod(path, cmode)
 
 def recursive_chmod(path, mode):
@@ -35,9 +43,6 @@ def recursive_chmod(path, mode):
             chmod(os.path.join(root, f), mode)
 
 ## tarball
-import tarfile
-import stat
-import shutil
 TIMESTAMP_FILE = '.tarball-timestamp'
 def tarball_create(target, suffix=None, delete_target=False):
     ''' create tarball '''

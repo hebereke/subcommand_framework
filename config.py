@@ -43,7 +43,7 @@ class GlobalConfig:
         '''return number of fields'''
         if not cls._has_instance():
             return 0
-        return len(asdict(cls._current_dict()))
+        return len(cls._current_dict())
 
     @classmethod
     def is_empty(cls) -> bool:
@@ -67,7 +67,7 @@ class GlobalConfig:
     def get(cls, key: str) -> Any:
         '''get value of specific key'''
         cls._ensure_field(key)
-        getattr(cls._instance, key)
+        return getattr(cls._instance, key)
 
     @classmethod
     def set_config(cls, config: ConfigT) -> None:
@@ -162,12 +162,12 @@ class _ConfigProxy:
     ## accessing field via attribute
     def __getattr__(self, name: str):
         '''get field'''
-        GlobalConfig.get(name)
+        return GlobalConfig.get(name)
     def __setattr__(self, name: str, value: Any):
         '''set field'''
         GlobalConfig.set(name, value)
 
-    ## sccessing fields as dict method
+    ## accessing fields as dict method
     def keys(self):
         '''return all keys stored in GlobalConfig'''
         return GlobalConfig.keys()
@@ -186,7 +186,7 @@ class _ConfigProxy:
     ## convert to dict
     def to_dict(self):
         '''export to dict'''
-        return GlobalConfig.__current_dict()
+        return GlobalConfig._current_dict()
 
     ## display config
     def display(self, indent=4):

@@ -10,8 +10,8 @@ class ConfigCommon:
     tmpfile: str| None = None
     verbose: bool = False
 
-def common_argument() -> dict:
-    '''parse arguments and return as dict'''
+def common_arguments() -> argparse.ArgumentParser:
+    '''parse arguments and return a parser for common options'''
     parser_common = argparse.ArgumentParser(add_help=False)
 
     ## common options
@@ -23,7 +23,7 @@ def common_argument() -> dict:
         help='enable verbose mode'
     )
     args_common.add_argument(
-        'version',
+        '--version',
         action='version',
         version=f'%(prog)s {config.version}'
     )
@@ -31,7 +31,7 @@ def common_argument() -> dict:
     ## logging options
     args_log = parser_common.add_argument_group('logging options')
     args_log.add_argument(
-        'loglevel',
+        '--loglevel',
         default=config.loglevel,
         help='loglevel from "CRITICAL|ERROR|WARNING|INFO|DEBUG"',
         metavar="LOGLEVEL"
@@ -46,7 +46,7 @@ def common_argument() -> dict:
     return parser_common
 
 def preproc_config():
-    pass
+    return None
 
-def postproc_config():
-    pass
+def postproc_config(args=None):
+    return None

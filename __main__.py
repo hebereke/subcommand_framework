@@ -1,7 +1,7 @@
 ## check if yaml library is available
 import importlib.util
-if not importlib.util.find_spec('yaml'):
-    Exception('taml module is required')
+if importlib.util.find_spec('yaml') is None:
+    raise ImportError('yaml module is required')
 
 ## load standard libraries
 from dataclasses import dataclass, field
@@ -24,7 +24,7 @@ if __name__ == '__main__':
         description: str = ''                       # program description
         version: float = 0.0                        # version
         package_dir: Path = package_dir             # package installation directory
-        subcommands_dir: Path = Path('subcommands') # subcommands directory relatively to package_dir
+        subcommands_dir: Path = Path('subcommand') # subcommands directory relatively to package_dir
         data_dir: Path = Path('data')               # data directory relatively to package_dir
         debug: bool = False                         # debug mode flag
         params: dict = field(default_factory=dict)  # package config and user defined config

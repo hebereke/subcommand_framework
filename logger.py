@@ -25,7 +25,8 @@ class ResultLogger(logging.Logger):
         prefix=None,
         prefix_delimiter=' ',
         output_delimiter=' ',
-        indent=0
+        indent=0,
+        **kwargs
         ):
         ## prefix
         if prefix is None and self.default_prefix is not None:
@@ -37,7 +38,7 @@ class ResultLogger(logging.Logger):
         if prefix is not None:
             message = f'{prefix}{prefix_delimiter}{message}'
         if indent > 0:
-            message = f'{indent * ' '}{message}'
+            message = f"{' ' * indent}{message}"
 
         ## output to stdout
         if output_stdout:
@@ -45,8 +46,9 @@ class ResultLogger(logging.Logger):
 
         ## output to logfile
         if logfile:
-            fh = logging.FileHandler(logfile, mode='a', encode='utf-8')
+            fh = logging.FileHandler(logfile, mode='a', encoding='utf-8')
             fh.setFormatter(logging.Formatter('%(message)s'))
+            self.addHandler(fh)
             self.log(RESULT_LEVEL, message, **kwargs)
             self.removeHandler(fh)
 
@@ -62,12 +64,12 @@ def setup_logging(config_file=LOGGING_CONFIG_FILE, logfile=None):
             handler = logging_config['handlers']['fileHandler']
             if handler.get('filename') == '__LOGFILE__':
                 handler['filename'] = logfile
-    logging.config.dictConfig(config)
+    logging.config.dictConfig(logging_config)
 
 def get_logger(name=None):
     return logging.getLogger(name)
 
 def default_logfile_name(script_name=SCRIPT_NAME):
-    now = datetime.datetime.now().strftime('%y%m%d%H%M%')
+    now = datetime.datetime.now().strftime('%y%m%d%H%M')
     logfile_name = f'{script_name}-{now}-{os.getpid()}.log'
     return Path.cwd() / Path(logfile_name)

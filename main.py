@@ -1,20 +1,20 @@
 ## load standard libraries
 import yaml
 import importlib
-from dataclasses import make_dataclass
+from dataclasses import make_dataclass, field
 from pathlib import Path
 
 ## load subcommands_framework libraries
 from config import config
 from args import config_arguments, positional_arguments, build_root_parser, error_nosubcommand
 from logger import get_logger
-from template.package_config import ConfigCommon, common_arguments, preproc_config, postproc_config
+from package_config import ConfigCommon, common_arguments, preproc_config, postproc_config
 
 ## append common config
 config.append_config(ConfigCommon)
 
-## declare logger
-logger = get_logger(config.prog)
+## declare a safe default logger for module-level functions; main() will reinitialize
+logger = get_logger(__name__)
 
 ## default user config files location
 USER_CONFIG_FILES = [
@@ -28,13 +28,13 @@ def search_configfile(config_files: list) -> Path | None:
     for p in map(Path, config_files):
         p = p.expanduser().absolute()
         if p.is_file():
-            logger.info('detect {p}')
+            logger.info(f'detect {p}')
             return p
-        return None
+    return None
 
 def load_config_file(config_file: Path) -> dict:
     '''load YAML format config file'''
-    defaults = []
+    defaults = {}
     if isinstance(config_file, Path) and config_file.is_file():
         logger.info(f'load config file ({config_file})')
         with config_file.open('r', encoding='utf-8') as f:
@@ -53,7 +53,10 @@ def load_user_config_file(parser_config, user_config_files):
     if config_file is not None:
         user_config_defaults = load_config_file(config_file)
         if 'common' in user_config_defaults:
-            ConfigUserCommon = make_dataclass('ConfigUserCommon', user_config_defaults['common'])
+            fields_spec = []
+            for k, v in user_config_defaults['common'].items():
+                fields_spec.append((k, type(v), field(default=v)))
+            ConfigUserCommon = make_dataclass('ConfigUserCommon', fields_spec)
             config.append_config(ConfigUserCommon)
         if config.debug:
             logger.debug('Default configs:')
@@ -70,7 +73,7 @@ def load_subcommands(subparsers, parent_parsers):
                 logger.debug(f'load {module_name}')
                 logger.debug(config.print_config())
             if config.subcommands_dir.name == '': # subcommands_dir = Path('.')
-                module - importlib.import_module(module_name)
+                module = importlib.import_module(module_name)
             else:
                 module = importlib.import_module(f'{config.subcommands_dir.name}.{module_name}')
             module.register_subcommand(subparsers, parent_parsers)
@@ -78,6 +81,10 @@ def load_subcommands(subparsers, parent_parsers):
 def main():
     ## pre-processing
     preproc_config()
+
+    # reinitialize logger with program name after config is ready
+    global logger
+    logger = get_logger(config.prog)
 
     ## define config file argument and load user config file
     parser_config = config_arguments(USER_CONFIG_FILES)
@@ -101,7 +108,7 @@ def main():
         subparsers,
         [parser_config, parser_common, parser_positional]
     )
-    args = parser_args()
+    args = parser.parse_args()
 
     ## post-processing
     postproc_config(args)
