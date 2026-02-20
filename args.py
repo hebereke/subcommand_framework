@@ -95,7 +95,7 @@ def config_arguments(default_configfiles: list) -> argparse.ArgumentParser:
 
 def error_nosubcommand(parser: argparse.ArgumentParser):
     '''print error if no subcommand is specified'''
-    print(f'ERROR: missing subcommand and any other arguments')
+    print(f'ERROR: missing subcommand')
     print(f'usage: {parser.prog} <subcommand> [options] ...')
     print(f'try "{parser.prog} --help"')
 
