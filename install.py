@@ -29,7 +29,7 @@ def create_script(scriptpath, installdir, python_command):
     os.chmod(scriptpath, cmode)
 
 def testscript(args):
-    create_script('test', Path.cwd(), args.pythoncmd)
+    create_script(f'{args.scriptname}_test', Path.cwd(), args.pythoncmd)
 
 def package_installation(args):
     ## decide parameters
