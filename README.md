@@ -12,8 +12,11 @@ This repository provides a small, lightweight framework for building Python comm
 
 Requirements
 ------------
+Requirements
+------------
 - Python 3.10+ (uses modern type syntax and dataclass features)
-- See `requirements.txt` for test/runtime extras (PyYAML, pytest).
+- PyYAML (yaml) — required at runtime for loading YAML config files
+- For development/testing: see `requirements.txt` (pytest etc.)
 
 Quick start
 -----------

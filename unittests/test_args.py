@@ -1,6 +1,7 @@
 import argparse
 
-from args import ListArgumentAction, config_arguments, positional_arguments, build_root_parser
+from args import ListArgumentAction, config_arguments, build_root_parser
+from template.package_config import positional_arguments
 
 
 def test_list_argument_action_splits_csv():

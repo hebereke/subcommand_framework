@@ -1,7 +1,6 @@
-## check if yaml library is available
-import importlib.util
-if importlib.util.find_spec('yaml') is None:
-    raise ImportError('yaml module is required')
+## environment check
+from utils import environment_check
+environment_check()
 
 ## load standard libraries
 from dataclasses import dataclass, field

@@ -1,3 +1,7 @@
+## environment check
+from utils import environment_check
+environment_check()
+
 import os
 import stat
 import shutil
@@ -5,10 +9,6 @@ import glob
 import argparse
 from pathlib import Path
 
-## check if yaml library is available
-import importlib.util
-if importlib.util.find_spec('yaml') is None:
-    raise ImportError('yaml module is required')
 from configfile import load_package_config
 
 def create_script(scriptpath, installdir, python_command):

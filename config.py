@@ -159,6 +159,13 @@ class _ConfigProxy:
             return list(GlobalConfig.keys())
         except Exception:
             return []
+    def __repr__(self) -> str:
+        '''concise representation showing number of configured fields'''
+        try:
+            count = GlobalConfig.count()
+        except Exception:
+            count = 0
+        return f'<Config: {count} fields>'
     ## accessing field via attribute
     def __getattr__(self, name: str):
         '''get field'''
@@ -189,11 +196,11 @@ class _ConfigProxy:
         return GlobalConfig._current_dict()
 
     ## display config
-    def display(self, indent=4):
-        '''display config keys and values with readable format'''
+    def summary(self, indent=4):
+        '''return a human-readable summary of all config fields and values'''
         out = 'Config:\n'
-        indent_space = indent * ' '
-        for k,v in self.items():
+        indent_space = ' ' * indent
+        for k, v in self.items():
             out += f'{indent_space}{k} = {v}\n'
         return out
 

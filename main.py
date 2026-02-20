@@ -110,13 +110,11 @@ def main():
     )
     args = parser.parse_args()
 
-    ## post-processing
-    postproc_config(args)
-
     ## help printout if no subcommand is specified
     if args.command is None:
         error_nosubcommand(parser)
         parser.exit(2)
     ## otherwise call function related to subcommand
     else:
+        postproc_config(args) # post-processing
         args.handler(args)

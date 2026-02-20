@@ -5,10 +5,28 @@ import stat
 import tarfile
 import shutil
 
+## environment check
+def environment_check(min_major: int = 3, min_minor: int = 10):
+    """Ensure required runtime is available.
+
+    - Verifies PyYAML is importable.
+    - Verifies Python version >= min_major.min_minor.
+    """
+    ## check if yaml module is available
+    import importlib.util
+    if importlib.util.find_spec('yaml') is None:
+        raise ImportError('yaml module is required')
+
+    ## check Python version (major and minor)
+    from sys import version_info
+    if (version_info.major, version_info.minor) < (min_major, min_minor):
+        raise RuntimeError(f'Python {min_major}.{min_minor}+ is required (found {version_info.major}.{version_info.minor})')
+
+## normalized date/time output
 def formattednow():
     return datetime.datetime.now().strftime('%y%m%d%H%M')
 
-#@ chmod and recursive chmod
+## chmod and recursive chmod
 def chmod(path, mode):
     perm_bits = {'ur' : stat.S_IRUSR,'uw' : stat.S_IWUSR,'ux' : stat.S_IXUSR,
                 'gr' : stat.S_IRGRP,'gw' : stat.S_IWGRP,'gx' : stat.S_IXGRP,
@@ -53,6 +71,7 @@ def tarball_create(
         create_timestamp=True
         ):
     ''' create tarball '''
+    now = formattednow()
     srcpdir = os.path.dirname(os.path.abspath(target))
     srcbname = os.path.basename(target)
 
@@ -73,7 +92,7 @@ def tarball_create(
 
     ## decide tarball file path
     if suffix is None:
-        suffix = formattednow()
+        suffix = now
     if tarout is None:
         tarout = f'{srcbname}-{suffix}.tar.gz'
         if dstdir is not None:
@@ -106,7 +125,7 @@ def tarball_restore(target):
     srcbname = None
     tsflag = False
     tar = tarfile.open(target, 'r:gz')
-    timestamp = os.path.join(tar.getnames()[0], TIMESTAMP_FILE)
+    timestamp = os.path.join(tar.getnames()[0], TARBALL_TIMESTAMP_FILE)
     if not timestamp in tar.getnames():
         print('no timestamp file')
         return False
