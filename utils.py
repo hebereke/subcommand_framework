@@ -43,36 +43,59 @@ def recursive_chmod(path, mode):
             chmod(os.path.join(root, f), mode)
 
 ## tarball
-TIMESTAMP_FILE = '.tarball-timestamp'
-def tarball_create(target, suffix=None, delete_target=False):
+TARBALL_TIMESTAMP_FILE = '.tarball-timestamp'
+def tarball_create(
+        target,
+        tarout=None,
+        dstdir=None,
+        suffix=None,
+        delete_target=False,
+        create_timestamp=True
+        ):
     ''' create tarball '''
-    now = formattednow()
     srcpdir = os.path.dirname(os.path.abspath(target))
     srcbname = os.path.basename(target)
-    tsout =  '#TARBALL\n'
-    tsout += '#SRC {}\n'.format(srcbname)
-    tsout += '#DST {}\n'.format(srcpdir)
-    tsout += '#TIME {}\n'.format(now)
-    cwd = os.getcwd()
-    cmode = os.stat(target).st_mode
-    chmod(target, 'u+wx')
-    os.chdir(srcpdir)
-    timestamp = os.path.join(srcbname, TIMESTAMP_FILE)
-    with open(timestamp, 'w') as TS:
-        TS.write(tsout)
-    os.chmod(target, cmode)
+
+    ## create timestamp file
+    if create_timestamp:
+        cwd = os.getcwd()
+        cmode = os.stat(target).st_mode
+        chmod(target, 'u+wx')
+        os.chdir(srcpdir)
+        tsout =  '#TARBALL\n'
+        tsout += '#SRC {}\n'.format(srcbname)
+        tsout += '#DST {}\n'.format(srcpdir)
+        tsout += '#TIME {}\n'.format(now)
+        timestamp = os.path.join(srcbname, TARBALL_TIMESTAMP_FILE)
+        with open(timestamp, 'w') as TS:
+            TS.write(tsout)
+        os.chmod(target, cmode)
+
+    ## decide tarball file path
     if suffix is None:
-        suffix = now
-    tarout = '{}-{}.tar.gz'.format(srcbname, suffix)
+        suffix = formattednow()
+    if tarout is None:
+        tarout = f'{srcbname}-{suffix}.tar.gz'
+        if dstdir is not None:
+            if not os.path.isdir(dstdir):
+                raise FileNotFoundError(f'invalid destination directory: {dstdir}')
+            tarout = os.path.join(dstdir, tarout)
+    else:
+        dstdir = os.path.dirname(os.path.abspath(tarout))
+        if dstdir and not os.path.isdir(dstdir):
+            raise FileNotFoundError(f'invalid destination directory: {dstdir}')
+        if not tarout.endswith('.tar.gz'):
+            raise ValueError('tarball file must end with .tar.gz')
     tar = tarfile.open(tarout, 'w:gz')
     tar.add(srcbname)
     tar.close()
-    chmod(target, 'u+wx')
-    os.remove(timestamp)
+    if create_timestamp:
+        chmod(target, 'u+x')
+        os.remove(timestamp)
     if delete_target:
         recursive_chmod(target, 'u+rwx')
         shutil.rmtree(target)
-    else:
+    elif create_timestamp:
         os.chmod(target, cmode)
     os.chdir(cwd)
     return os.path.abspath(tarout)
