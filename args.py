@@ -75,7 +75,7 @@ https://stackoverflow.com/questions/13423540/argparse-subparser-hide-metavar-in-
     def add_usage(self, usage, actions, groups, prefix=None):
         '''root only "[subcommand]" injection'''
         if usage is None:
-            actions_usage = self.__format_action_usage(actions, groups)
+            actions_usage = self._format_actions_usage(actions, groups)
             has_subparsers = any(isinstance(a, argparse._SubParsersAction) for a in actions)
             if has_subparsers:
                 usage = '%(prog)s [subcommand] ' + actions_usage
