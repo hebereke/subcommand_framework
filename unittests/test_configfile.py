@@ -1,5 +1,5 @@
 import pytest
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path, PosixPath
 
 from configfile import initialize_params
