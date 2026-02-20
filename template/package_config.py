@@ -45,6 +45,17 @@ def common_arguments() -> argparse.ArgumentParser:
 
     return parser_common
 
+def positional_arguments() -> argparse.ArgumentParser:
+    '''parser of positional arguments for subcommands'''
+    parser_positional = argparse.ArgumentParser(add_help=False)
+    parser_positional.add_argument(
+        'target',
+        nargs='+',
+        metavar='FILE',
+        help='target files'
+    )
+    return parser_positional
+
 def preproc_config():
     return None
 

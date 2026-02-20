@@ -93,17 +93,6 @@ def config_arguments(default_configfiles: list) -> argparse.ArgumentParser:
     )
     return parser_config
 
-def positional_arguments() -> argparse.ArgumentParser:
-    '''parser of positional arguments for subcommands'''
-    parser_positional = argparse.ArgumentParser(add_help=False)
-    parser_positional.add_argument(
-        'target',
-        nargs='+',
-        metavar='FILE',
-        help='target files'
-    )
-    return parser_positional
-
 def error_nosubcommand(parser: argparse.ArgumentParser):
     '''print error if no subcommand is specified'''
     print(f'ERROR: missing subcommand and any other arguments')
