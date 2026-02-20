@@ -4,7 +4,7 @@ import yaml
 from typing import Type
 from config import ConfigT
 
-PACKAGE_CONFIG_FILE = 'package_configs.yaml'
+PACKAGE_CONFIG_FILE = 'package_config.yaml'
 
 def load_package_config(package_dir: Path) -> dict:
     '''load package configuration file'''
