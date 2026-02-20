@@ -1,6 +1,4 @@
-## environment check
-from utils import environment_check
-environment_check()
+## package entrypoint (environment check handled by package import)
 
 ## load standard libraries
 from dataclasses import dataclass, field
