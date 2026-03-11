@@ -24,7 +24,7 @@ USER_CONFIG_FILES = [
 ]
 
 def search_configfile(config_files: list) -> Path | None:
-    '''search config file location'''
+    """search config file location"""
     for p in map(Path, config_files):
         p = p.expanduser().absolute()
         if p.is_file():
@@ -33,7 +33,7 @@ def search_configfile(config_files: list) -> Path | None:
     return None
 
 def load_config_file(config_file: Path) -> dict:
-    '''load YAML format config file'''
+    """load YAML format config file"""
     defaults = {}
     if isinstance(config_file, Path) and config_file.is_file():
         logger.info(f'load config file ({config_file})')
@@ -45,7 +45,7 @@ def load_config_file(config_file: Path) -> dict:
     return defaults
 
 def load_user_config_file(parser_config, user_config_files):
-    '''determine config file path and load available config file'''
+    """determine config file path and load available config file"""
     args_config,_ = parser_config.parse_known_args()
     if args_config.config:
         user_config_files = [args_config.config] + user_config_files
@@ -66,7 +66,7 @@ def load_user_config_file(parser_config, user_config_files):
     return config.params
 
 def load_subcommands(subparsers, parent_parsers):
-    '''load subcommand modules and register available config and arguments'''
+    """load subcommand modules and register available config and arguments"""
     if 'package' in config.params:
         for module_name in config.params['package']['subcommand_modules']:
             if config.debug:

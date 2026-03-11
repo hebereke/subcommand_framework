@@ -1,5 +1,5 @@
 ### template subcommand module
-'''subcommand module template'''
+"""subcommand module template"""
 
 ## must libraries and modules
 from dataclasses import dataclass
@@ -47,7 +47,7 @@ def register_subcommand(subparsers, parent_parsers):
     )
 
 def cmd(j):
-    '''template command'''
+    """template command"""
     if config.debug_flag:
         logger.debug(f'{config.prefix_template} w/ debug flag by config.debug_flag={config.debug_flag}')
         logger.debug(config.display())

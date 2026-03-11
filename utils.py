@@ -70,7 +70,7 @@ def tarball_create(
         delete_target=False,
         create_timestamp=True
         ):
-    ''' create tarball '''
+    """ create tarball """
     now = formattednow()
     srcpdir = os.path.dirname(os.path.abspath(target))
     srcbname = os.path.basename(target)
@@ -120,7 +120,7 @@ def tarball_create(
     return os.path.abspath(tarout)
 
 def tarball_restore(target):
-    ''' restore tarball '''
+    """ restore tarball """
     srcpdir = None
     srcbname = None
     tsflag = False

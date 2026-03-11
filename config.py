@@ -4,20 +4,20 @@ from typing import Type, TypeVar, Any, Optional, Tuple, Dict
 ConfigT = TypeVar('ConfigT')
 
 class GlobalConfig:
-    '''
+    """
     GlobalConfig class
     support dataclass only
-    '''
+    """
     _instance: Optional[Any] = None
 
     @classmethod
     def _has_instance(cls) -> bool:
-        '''check if _instance is None'''
+        """check if _instance is None"""
         return cls._instance is not None
 
     @classmethod
     def _init_check(cls) -> None:
-        '''sanity check if has been initialized'''
+        """sanity check if has been initialized"""
         if not cls._has_instance():
             raise RuntimeError('GlobalConfig not initialized')
 
@@ -29,87 +29,87 @@ class GlobalConfig:
 
     @classmethod
     def _current_dict(cls) -> dict:
-        '''helper method converting GlobalConfig to dict'''
+        """helper method converting GlobalConfig to dict"""
         cls._init_check()
         return asdict(cls._instance)
 
     @classmethod
     def is_valid(cls) -> bool:
-        '''return True if valid'''
+        """return True if valid"""
         return cls._instance is not None and is_dataclass(cls._instance)
 
     @classmethod
     def count(cls) -> int:
-        '''return number of fields'''
+        """return number of fields"""
         if not cls._has_instance():
             return 0
         return len(cls._current_dict())
 
     @classmethod
     def is_empty(cls) -> bool:
-        '''return True if empty'''
+        """return True if empty"""
         return cls.count() == 0
 
     @classmethod
     def describe(cls) -> str:
-        '''return description strings'''
+        """return description strings"""
         if cls.is_empty():
             return '<GlobalConfig: empty>'
         return f'<GlobalConfig: {cls.count()} fields, current=cls._instance>'
 
     @classmethod
     def set(cls, key: str, value:Any) -> None:
-        '''set value to specific key'''
+        """set value to specific key"""
         cls._ensure_field(key)
         setattr(cls._instance, key, value)
 
     @classmethod
     def get(cls, key: str) -> Any:
-        '''get value of specific key'''
+        """get value of specific key"""
         cls._ensure_field(key)
         return getattr(cls._instance, key)
 
     @classmethod
     def set_config(cls, config: ConfigT) -> None:
-        '''set local config instance'''
+        """set local config instance"""
         if not is_dataclass(config):
             raise TypeError('set_config expects a dataclass instance')
         cls._instance = config
 
     @classmethod
     def get_config(cls) -> ConfigT:
-        '''get stored config as instance'''
+        """get stored config as instance"""
         cls._init_check()
         return cls._instance
 
     @classmethod
     def reset(cls) -> None:
-        '''clear GlobalConfig'''
+        """clear GlobalConfig"""
         cls._instance = None
 
     @classmethod
     def keys(cls) -> Tuple[str, ...]:
-        '''return all keys stored in GlobalConfig'''
+        """return all keys stored in GlobalConfig"""
         data = cls._current_dict()
         return tuple(data.keys())
 
     @classmethod
     def values(cls) -> Tuple[str, ...]:
-        '''return all values stored in GlobalConfig'''
+        """return all values stored in GlobalConfig"""
         data = cls._current_dict()
         return tuple(data.values())
 
     @classmethod
     def items(cls) -> Tuple[str, ...]:
-        '''return all combinations of keys and values stored in GlobalConfig'''
+        """return all combinations of keys and values stored in GlobalConfig"""
         data = cls._current_dict()
         return tuple(data.items())
 
     @classmethod
     def extend_schema(cls, *schema_classes: Type[Any], prefer_existing: bool = True):
-        '''append specific dataclass fields
+        """append specific dataclass fields
             - prefer_existing: True to prioritize existed schema
-        '''
+        """
         if not schema_classes:
             return
 
@@ -153,14 +153,14 @@ class GlobalConfig:
         cls._instance = MergedConfig(**init_kwargs)
 
 class _ConfigProxy:
-    '''proxy class to GlobalConfig for syntax sugar'''
+    """proxy class to GlobalConfig for syntax sugar"""
     def __dir__(self):
         try:
             return list(GlobalConfig.keys())
         except Exception:
             return []
     def __repr__(self) -> str:
-        '''concise representation showing number of configured fields'''
+        """concise representation showing number of configured fields"""
         try:
             count = GlobalConfig.count()
         except Exception:
@@ -168,36 +168,36 @@ class _ConfigProxy:
         return f'<Config: {count} fields>'
     ## accessing field via attribute
     def __getattr__(self, name: str):
-        '''get field'''
+        """get field"""
         return GlobalConfig.get(name)
     def __setattr__(self, name: str, value: Any):
-        '''set field'''
+        """set field"""
         GlobalConfig.set(name, value)
 
     ## accessing fields as dict method
     def keys(self):
-        '''return all keys stored in GlobalConfig'''
+        """return all keys stored in GlobalConfig"""
         return GlobalConfig.keys()
     def values(self):
-        '''return all values stored in GlobalConfig'''
+        """return all values stored in GlobalConfig"""
         return GlobalConfig.values()
     def items(self):
-        '''return all combinations of keys and values stored in GlobalConfig'''
+        """return all combinations of keys and values stored in GlobalConfig"""
         return GlobalConfig.items()
 
     ## alias to extend_schema
     def append_config(self, config_class: ConfigT):
-        '''append one dataclass schema to GlobalConfig'''
+        """append one dataclass schema to GlobalConfig"""
         return GlobalConfig.extend_schema(config_class)
 
     ## convert to dict
     def to_dict(self):
-        '''export to dict'''
+        """export to dict"""
         return GlobalConfig._current_dict()
 
     ## display config
     def summary(self, indent=4):
-        '''return a human-readable summary of all config fields and values'''
+        """return a human-readable summary of all config fields and values"""
         out = 'Config:\n'
         indent_space = ' ' * indent
         for k, v in self.items():

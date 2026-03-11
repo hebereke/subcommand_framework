@@ -7,7 +7,7 @@ from config import ConfigT
 PACKAGE_CONFIG_FILE = 'package_config.yaml'
 
 def load_package_config(package_dir: Path) -> dict:
-    '''load package configuration file'''
+    """load package configuration file"""
     package_config_file = package_dir / Path(PACKAGE_CONFIG_FILE)
     if not package_config_file.is_file():
         raise FileExistsError(f'no package config file {package_config_file}')
@@ -20,7 +20,7 @@ def load_package_config(package_dir: Path) -> dict:
     return package_config
 
 def initialize_params(config: Type[ConfigT], params: dict | None) -> dict:
-    '''initialize parameter by defined type in config'''
+    """initialize parameter by defined type in config"""
     config_params = asdict(config())
     if params:
         for f in fields(config):

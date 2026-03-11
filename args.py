@@ -2,12 +2,12 @@ import argparse
 from typing import Tuple
 
 class ListArgumentAction(argparse.Action):
-    '''new action to take CSV as list'''
+    """new action to take CSV as list"""
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values.split(','))
 
 class CustomHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHelpFormatter):
-    '''formatter to handle default properly'''
+    """formatter to handle default properly"""
     def __init__(self, prog, indent_increment=2, max_help_position=32, width=None):
         super(CustomHelpFormatter, self).__init__(prog, indent_increment, max_help_position, width)
     def _get_help_string(self, action):
@@ -62,10 +62,10 @@ class CustomHelpFormatter(argparse.RawTextHelpFormatter, argparse.RawDescription
         return help_text
 
 class RootHelpFormatter(CustomHelpFormatter):
-    '''formatter for root parser'''
+    """formatter for root parser"""
     def _format_action(self, action):
-        '''hide the top metavar line subcommands block referring to
-https://stackoverflow.com/questions/13423540/argparse-subparser-hide-metavar-in-command-listing'''
+        """hide the top metavar line subcommands block referring to
+https://stackoverflow.com/questions/13423540/argparse-subparser-hide-metavar-in-command-listing"""
         parts = super()._format_action(action)
         if isinstance(action, argparse._SubParsersAction):
             lines = parts.splitlines()
@@ -73,7 +73,7 @@ https://stackoverflow.com/questions/13423540/argparse-subparser-hide-metavar-in-
                 parts = '\n'.join(lines[1:])
         return parts
     def add_usage(self, usage, actions, groups, prefix=None):
-        '''root only "[subcommand]" injection'''
+        """root only "[subcommand]" injection"""
         if usage is None:
             actions_usage = self._format_actions_usage(actions, groups)
             has_subparsers = any(isinstance(a, argparse._SubParsersAction) for a in actions)
@@ -84,7 +84,7 @@ https://stackoverflow.com/questions/13423540/argparse-subparser-hide-metavar-in-
         return super().add_usage(usage, actions, groups, prefix)
 
 def config_arguments(default_configfiles: list) -> argparse.ArgumentParser:
-    '''parse argument for config file'''
+    """parse argument for config file"""
     parser_config = argparse.ArgumentParser(add_help=False)
     config_files = ' or '.join(map(str, default_configfiles))
     parser_config.add_argument(
@@ -94,13 +94,13 @@ def config_arguments(default_configfiles: list) -> argparse.ArgumentParser:
     return parser_config
 
 def error_nosubcommand(parser: argparse.ArgumentParser):
-    '''print error if no subcommand is specified'''
+    """print error if no subcommand is specified"""
     print(f'ERROR: missing subcommand')
     print(f'usage: {parser.prog} <subcommand> [options] ...')
     print(f'try "{parser.prog} --help"')
 
 def build_root_parser(prog: str, description: str, parent_parsers: list) -> Tuple[argparse.ArgumentParser, argparse._SubParsersAction]:
-    '''build root parser with specified parent parsers'''
+    """build root parser with specified parent parsers"""
     parser = argparse.ArgumentParser(
         prog=prog,
         description=description,

@@ -11,7 +11,7 @@ class ConfigCommon:
     verbose: bool = False
 
 def common_arguments() -> argparse.ArgumentParser:
-    '''parse arguments and return a parser for common options'''
+    """parse arguments and return a parser for common options"""
     parser_common = argparse.ArgumentParser(add_help=False)
 
     ## common options
@@ -46,7 +46,7 @@ def common_arguments() -> argparse.ArgumentParser:
     return parser_common
 
 def positional_arguments() -> argparse.ArgumentParser:
-    '''parser of positional arguments for subcommands'''
+    """parser of positional arguments for subcommands"""
     parser_positional = argparse.ArgumentParser(add_help=False)
     parser_positional.add_argument(
         'target',
