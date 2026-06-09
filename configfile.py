@@ -1,4 +1,4 @@
-from dataclasses import dataclass, fields, asdict
+from dataclasses import fields, asdict
 from pathlib import Path, PosixPath
 import yaml
 from typing import Type
